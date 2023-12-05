@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(eventForm);
         const partyData = {
             name: formData.get('name'),
-            date: formData.get('date'),
+            date: new Date(formData.get('date')).toISOString(), // Convert to ISO-8601 DateTime
             location: formData.get('location'),
             description: formData.get('description'),
         };
@@ -70,6 +70,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(partyData),
             });
+
+            if (!response.ok) {
+                const responseBody = await response.json();
+                console.error('Server response:', responseBody);
+
+                if (responseBody.error && responseBody.error.message) {
+                    console.error('Server error message:', responseBody.error.message);
+                }
+
+                throw new Error('Failed to add party');
+            }
+
             const { data: newParty } = await response.json();
             addPartyToList(newParty);
         } catch (error) {
